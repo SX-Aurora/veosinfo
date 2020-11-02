@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017-2019 NEC Corporation
+ * Copyright (C) 2020 NEC Corporation
  * This file is part of the VEOS information library.
  *
  * The VEOS information library is free software; you can redistribute it
@@ -64,6 +64,7 @@ enum velib_cmdreq {
 	VE_SWAP_NODEINFO,
 	VE_SWAP_OUT,
 	VE_SWAP_IN,
+	VE_SWAP_GET_CNS,
 	VE_RPM_INVALID = -1
 };
 
@@ -71,7 +72,8 @@ enum velib_cmdreq {
  * @brief command ID's used to communicate b/w RPM Library and VEOS
  */
 enum veos_msg_id {
-	RPM_QUERY
+	RPM_QUERY,
+	RPM_QUERY_COMPT = 56
 };
 
 int velib_sock(char *);

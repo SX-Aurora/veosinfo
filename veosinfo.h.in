@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017-2019 NEC Corporation
+ * Copyright (C) 2020 NEC Corporation
  * This file is part of the VEOS information library.
  *
  * The VEOS information library is free software; you can redistribute it
@@ -35,6 +35,7 @@
 #include <sys/shm.h>
 #include <limits.h>
 #include <sys/mman.h>
+
 #define VE_EINVAL_COREID	-514	/*!< Error number for invalid cores */
 #define VE_EINVAL_NUMAID	-515	/*!< Error number for invalid NUMA node */
 #define VE_EINVAL_LIMITOPT	-516	/*!< Error number for invalid VE_LIMIT_OPT */
@@ -64,6 +65,7 @@
 #define VE_NUMA_NUM	2		/* Maximum NUMA nodes in each VE node */
 #define MAX_CORE_IN_HEX	4		/* Maximum core value in HEX */
 #define MAX_SWAP_PROCESS 256
+#define NS_DIV 2
 
 #ifdef __cplusplus  
 extern "C" {  
@@ -721,6 +723,28 @@ struct ve_swap_node_info {
 	unsigned long long node_swapped_sz;	/*!< swapped memory size of VE nodes*/
 };
 
+/**
+ * @brief This contains 'cns(Current Non-swappable memory Size)' or
+ *        'mns(Maximum Non-swappable memory Size) of process specified by pid'
+ */
+struct ve_ns_info_proc {
+	pid_t pid;
+	int64_t ns;
+};
+
+/**
+ * @brief This contains 'cns(Current Non-swappable memory Size)' of some processes.
+ *        VEOS returns Current non-swappable memory size of each VE process
+ *        by using this.
+ */
+struct ve_cns_info {
+	/* The size of struct ve_ns_info_proc is 16 byte, because of 'aligned'.
+	 * And this is sent by protobuf messages.
+	 * The size of protobuf messages should be less than 4096 byte.
+	 * This is why 'MAX_SWAP_PROCESS / NS_DIV'
+	 * */
+	struct ve_ns_info_proc info[MAX_SWAP_PROCESS / NS_DIV];
+};
 
 int ve_match_envrn(char *);
 char *ve_create_sockpath(int);
@@ -762,6 +786,8 @@ int ve_swap_info(int, struct ve_swap_pids *, struct ve_swap_info *);
 int ve_swap_nodeinfo(int, struct ve_swap_node_info *);
 int ve_swap_out(int, struct ve_swap_pids *);
 int ve_swap_in(int, struct ve_swap_pids *);
+int verify_version(int);
+int ve_swap_get_cns(int, struct ve_swap_pids *, struct ve_cns_info *);
 
 #ifdef __cplusplus 
 } //extern "C"
